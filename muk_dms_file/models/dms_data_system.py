@@ -177,7 +177,7 @@ class SystemFileDataModel(models.Model):
             try:
                 os.makedirs(os.path.dirname(file_path))
             except OSError as exc:
-                if not (exc.errno == errno.EEXIST and os.path.isdir(path)):
+                if not (exc.errno == errno.EEXIST and os.path.isdir(file_path)):
                     _logger.exception("Failed to create the necessary directories!")
                     raise AccessError(_("The System failed to create the necessary directories."))
     
@@ -232,7 +232,7 @@ class SystemFileDataModel(models.Model):
         try:
             shutil.move(old_file_path, new_file_path)
         except IOError as exc:
-            _logger.error("Failed to move the file(%s): %s" % (file_path, str(exc)))
+            _logger.error("Failed to move the file(%s): %s" % (old_file_path, str(exc)))
             if exc.errno == errno.ENOENT:
                 raise MissingError(
                 _("Something went wrong! Seems that the file (%s) is missing or broken.") %
@@ -247,7 +247,7 @@ class SystemFileDataModel(models.Model):
         except OSError as exc:
             if exc.errno != errno.ENOENT:
                 _logger.error("Failed to delete the file(%s): %s" % (file_path, str(exc)))
-                raise AccessError(_("The System failed to delete the file (%s).") % os.path.basename(old_file_path))
+                raise AccessError(_("The System failed to delete the file (%s).") % os.path.basename(file_path))
     
     @api.model
     def _remove_empty_directories(self, file_path):
