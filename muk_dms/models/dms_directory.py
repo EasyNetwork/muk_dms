@@ -488,6 +488,14 @@ class Directory(models.Model):
         super(Directory, self)._after_unlink_operation(result, operation, *largs, **kwargs)
         if not 'operation' in self.env.context:
             self.unlock_operation(operation=operation, refresh=True)
+
+    @api.model
+    def create(self, values):
+        """ We don't want the current user to be follower of new directories """
+        return super(
+            Directory,
+            self.with_context(mail_create_nosubscribe=True)
+        ).create(values)
     
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):

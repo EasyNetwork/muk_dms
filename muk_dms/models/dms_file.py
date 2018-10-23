@@ -520,3 +520,11 @@ class File(models.Model):
                    self.sorted(key=lambda rec: rec.reference._name),
                    lambda rec: rec.reference._name)]:
             self.env[tuple[0]].sudo().browse(list(filter(None, tuple[1]))).unlink()
+
+    @api.model
+    def create(self, values):
+        """ We don't want the current user to be follower of new files """
+        return super(
+            File,
+            self.with_context(mail_create_nosubscribe=True)
+        ).create(values)
