@@ -488,7 +488,7 @@ class File(models.Model):
         self.check_access('write', raise_exception=True)
         for record in self:
             save_type = record.settings and record.settings.read(['save_type'])
-            if record.reference and save_type and save_type != record.reference.type():
+            if record.reference and save_type and save_type[0]['save_type'] != record.reference.type():
                 reference = record._create_reference(
                     record.settings, record.directory.path, record.name, record.content)
                 if reference:
@@ -520,3 +520,11 @@ class File(models.Model):
                    self.sorted(key=lambda rec: rec.reference._name),
                    lambda rec: rec.reference._name)]:
             self.env[tuple[0]].sudo().browse(list(filter(None, tuple[1]))).unlink()
+
+    @api.model
+    def create(self, values):
+        """ We don't want the current user to be follower of new files """
+        return super(
+            File,
+            self.with_context(mail_create_nosubscribe=True)
+        ).create(values)
